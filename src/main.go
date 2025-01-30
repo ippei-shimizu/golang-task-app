@@ -17,7 +17,7 @@ type Task struct {
     Title string `json:"title"`
     Description string `json:"description"`
     Status string `json:"status"`
-    CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+    CreatedAt time.Time `json:"created_at"`
 }
 
 func main() {
@@ -34,6 +34,8 @@ func main() {
 
     r.GET("/tasks", getTasks)
     r.POST("/tasks", createTask)
+    r.DELETE("/tasks/:id", deleteTask)
+    r.PUT("/tasks/:id", updateTask)
 
     r.Run(":8080")
 }
@@ -52,4 +54,32 @@ func createTask(c *gin.Context) {
     }
     db.Create(&task)
     c.JSON(http.StatusCreated, task)
+}
+
+func deleteTask(c *gin.Context) {
+    id := c.Param("id")
+    var task Task
+    if err := db.First(&task, id).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "record not found"})
+    }
+
+    db.Delete(&task)
+    c.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
+}
+
+func updateTask(c *gin.Context) {
+    id := c.Param("id")
+    var task Task
+    if err := db.First(&task, id).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "record not found"})
+        return
+    }
+
+    var input Task
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    }
+
+    db.Model(&task).Updates(input)
+    c.JSON(http.StatusOK, task)
 }

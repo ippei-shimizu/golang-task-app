@@ -48,3 +48,23 @@ curl -X POST http://localhost:8080/tasks \
   "created_at": "2025-01-29T12:05:00Z"
 }
 ```
+
+### タスク編集
+
+PUT /tasks/:id"
+タスクを編集しましす。
+
+```sh
+curl -X PUT http://localhost:8080/tasks/1 \
+-H "Content-Type: application/json" \
+-d '{"title": "更新後のタイトル", "description": "更新後の説明", "status": "completed"}'
+```
+
+### タスク削除
+
+DELETE /tasks/:id
+タスクを削除します。
+
+```sh
+curl -X DELETE http://localhost:8080/tasks/1
+```
